@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "semgrep-search"
-version = "1.0.0"
+version = "1.0.1"
 description = "A tool to generate a custom Semgrep ruleset from multiple sources"
 authors = ["Malte Heinzelmann <malte@cybaer.ninja>"]
 readme = "README.md"
