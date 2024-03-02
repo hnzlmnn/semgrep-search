@@ -4,7 +4,7 @@ Did you ever want to search for semgrep rules from the [registry](https://semgre
 `semgrep-search` allows you to search for languages, categories and severities and outputs a single YAML file that you can use with semgrep.
 
 The database powering `semgrep-search` is automatically built continuously and published to ghcr.io through
-[oras](https://github.com/oras-project) via [this project](https://github.com/hnzlmnn/sgs-db).
+[oras](https://github.com/oras-project) via [this project](https://github.com/hnzlmnn/semgrep-search-db).
 
 ## Installation
 

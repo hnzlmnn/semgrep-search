@@ -1,4 +1,4 @@
-#      Semgrep-Search (sgs)
+#      Semgrep-Search
 #      Copyright (C) 2024  Malte Heinzelmann
 #
 #      This program is free software: you can redistribute it and/or modify

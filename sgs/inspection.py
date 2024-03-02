@@ -1,4 +1,4 @@
-#      Semgrep-Search (sgs)
+#      Semgrep-Search
 #      Copyright (C) 2024  Malte Heinzelmann
 #
 #      This program is free software: you can redistribute it and/or modify
@@ -83,7 +83,7 @@ def inspect(args: argparse.Namespace, db: TinyDB) -> None:
                 (format_datetime(datetime.datetime.fromisoformat(created_on)), 'blue'),
             ]
         info += [
-            ' using sgs-db ',
+            ' using semgrep-search-db ',
             (f'v{version}', 'green'),
             ' (',
             (commit, 'cyan'),

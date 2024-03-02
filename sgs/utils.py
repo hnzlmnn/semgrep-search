@@ -1,4 +1,4 @@
-#      Semgrep-Search (sgs)
+#      Semgrep-Search
 #      Copyright (C) 2024  Malte Heinzelmann
 #
 #      This program is free software: you can redistribute it and/or modify
@@ -37,7 +37,7 @@ def fix_languages(langauges: Union[set[str], list[str]]) -> set[str]:
     return {LANGUAGE_ALIASES.get(lang, lang) for lang in langauges}
 
 
-logger = logging.getLogger('sgsdb')
+logger = logging.getLogger('semgrep-search')
 
 
 def build_logger(args: argparse.Namespace) -> None:

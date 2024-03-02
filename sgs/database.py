@@ -1,4 +1,4 @@
-#      Semgrep-Search (sgs)
+#      Semgrep-Search
 #      Copyright (C) 2024  Malte Heinzelmann
 #
 #      This program is free software: you can redistribute it and/or modify
@@ -47,7 +47,7 @@ def load_local() -> Optional[TinyDB]:
 
 
 def update_db() -> Optional[TinyDB]:
-    files = GhcrProvider().pull(target='hnzlmnn/sgs-db:latest')
+    files = GhcrProvider().pull(target='hnzlmnn/semgrep-search-db:latest')
     for file in files:
         path = Path(file)
         if path.name == DB_FILENAME:

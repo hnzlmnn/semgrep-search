@@ -1,11 +1,11 @@
 [tool.poetry]
 name = "semgrep-search"
-version = "1.0.1"
+version = "1.0.2"
 description = "A tool to generate a custom Semgrep ruleset from multiple sources"
 authors = ["Malte Heinzelmann <malte@cybaer.ninja>"]
 readme = "README.md"
 license = "GPL-3.0-or-later"
-homepage = "https://github.com/hnzlmnn/sgs"
+homepage = "https://github.com/hnzlmnn/semgrep-search"
 packages = [{include = "sgs"}]
 
 [tool.poetry.scripts]
