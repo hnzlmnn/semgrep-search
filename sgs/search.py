@@ -16,14 +16,12 @@
 
 from __future__ import annotations
 
-import datetime
 import logging
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Callable, TYPE_CHECKING
 
-from babel.dates import format_datetime
 from tinydb import Query, TinyDB
 
 from sgs.utils import fix_languages, logger, write_ruleset
@@ -44,7 +42,6 @@ def get_set_from_arg(arg: Optional[list[str]]) -> Optional[set[str]]:
         result |= {part.strip() for part in param.split(',')}
 
     return result
-
 
 
 @dataclass
@@ -111,13 +108,6 @@ def filter_rules(rules: Table, config: FilterConfig) -> list[dict]:
 
 
 def search(args: argparse.Namespace, db: TinyDB) -> None:
-    meta = db.table('meta')
-    if len(meta) > 0:
-        metadata = meta.all()[0]
-        created_on = metadata.get('created_on', None)
-        if created_on:
-            logger.info('Database was created on %s', format_datetime(datetime.datetime.fromisoformat(created_on)))
-
     rules = db.table('rules')
     config = FilterConfig.from_args(args)
 

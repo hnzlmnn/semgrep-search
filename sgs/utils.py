@@ -20,14 +20,22 @@ import datetime
 import logging
 import sys
 from contextlib import contextmanager
-from typing import Union, Tuple, Callable, ContextManager, TextIO, TYPE_CHECKING
+from importlib import metadata
+from importlib.metadata import PackageNotFoundError
+from pathlib import Path
+from typing import Union, Tuple, Callable, ContextManager, TextIO, TYPE_CHECKING, Optional
 
+import tomli
+from babel.dates import format_datetime
+from rich.text import Text
 from ruamel.yaml import YAML, CommentedSeq, CommentedMap
+from semver import Version
 
 from sgs.const import LANGUAGE_ALIASES
 
 if TYPE_CHECKING:
     import argparse
+    from tinydb import TinyDB
 
 
 def fix_languages(langauges: Union[set[str], list[str]]) -> set[str]:
@@ -84,8 +92,67 @@ def write_ruleset(rules: list[dict], stream: TextIO) -> None:
     for rule in rules:
         rule_data: CommentedMap = yaml.load(rule['content'])
         rule_data.setdefault('metadata', CommentedMap())
+
+        # Add origin to metadata
         rule_data['metadata'].setdefault('semgrep.dev', CommentedMap())
         rule_data['metadata']['semgrep.dev'].setdefault('rule', CommentedMap())
         rule_data['metadata']['semgrep.dev']['rule']['origin'] = rule['source']
+
         data.append(rule_data)
     yaml.dump({'rules': data}, stream)
+
+
+def get_metadata(db: TinyDB) -> Optional[dict]:
+    metadata = db.table('meta').all()
+    if len(metadata) == 0:
+        return None
+    metadata = metadata[0]
+
+    created_on = metadata.get('created_on', None)
+    version = metadata.get('version', None)
+    min_version = metadata.get('min_version', None)
+    commit = metadata.get('commit', None)
+
+    if any(var is None for var in [created_on, version, commit]):
+        return None
+
+    try:
+        return {
+            'created_on': datetime.datetime.fromisoformat(created_on),
+            'version': Version.parse(version),
+            'commit': commit,
+            'min_version': Version.parse(min_version) if min_version else None,
+        }
+    except Exception:
+        return None
+
+
+def print_verbose_info(meta: dict) -> Text:
+    info = ['Database was created ']
+
+    if meta['created_on']:
+        info += [
+            'on ',
+            (format_datetime(meta['created_on']), 'blue'),
+        ]
+    info += [
+        ' using semgrep-search-db ',
+        (f'v{meta["version"]}', 'green'),
+        ' (',
+        (meta['commit'], 'cyan'),
+        ')',
+    ]
+
+    return Text.assemble(*info)
+
+
+def get_version() -> Version:
+    try:
+        version = metadata.version('semgrep-search-db')
+    except PackageNotFoundError:
+        try:
+            with Path('pyproject.toml').open('rb') as fin:
+                version = tomli.load(fin).get('tool').get('poetry').get('version')
+        except Exception:
+            version = '0.0.0-dev'
+    return Version.parse(version)

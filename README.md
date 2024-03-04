@@ -31,6 +31,10 @@ However, from time to time, there might be new rules added to the registry.
 To update the rules, run `semregp-search` with `--update`, shorthand `-u`,
 and the current state of the registry will be downloaded before searching for any rules.
 
+### Using the ruleset with semgrep
+
+Use the ruleset with semgrep as follows `semgrep -c rules.yaml src/`
+
 ## Known issues
 
 ### The tool found more rules than the website
@@ -38,6 +42,10 @@ and the current state of the registry will be downloaded before searching for an
 It appears as if semgrep.dev renamed `cs` (`C#` in the YAML files) to `csharp`,
 however some old rules seem to exist as duplicates prefixed with `cs` however their web search filters these out.
 I'm not quite sure why the JSON export still contains these and which other languages have been renamed in the past.
+
+During database generation, languages will be normalized according to the
+[table of languages](https://semgrep.dev/docs/writing-rules/rule-syntax/#language-extensions-and-languages-key-values)
+from the Semgrep documentation.
 
 ### The registry shows more rules when filtering for a language
 

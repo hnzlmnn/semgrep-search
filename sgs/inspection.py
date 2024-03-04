@@ -16,12 +16,9 @@
 
 from __future__ import annotations
 
-import datetime
 from typing import TYPE_CHECKING
 
-from babel.dates import format_datetime
 from rich import box
-from rich.columns import Columns
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
@@ -41,7 +38,7 @@ def gather_stats(db: TinyDB, args: argparse.Namespace) -> dict:
     languages = {}
 
     for rule in rules:
-        origin = rule.get('source_name', rule.get('source', None))
+        origin = rule.get('source', rule.get('source', None))
         if origin:
             origins.setdefault(origin, 0)
             origins[origin] += 1
@@ -60,53 +57,62 @@ def gather_stats(db: TinyDB, args: argparse.Namespace) -> dict:
         resolved_languages[language] = languages.get(base, 0)
 
     return {
+        'count': len(rules),
         'origins': origins,
         'languages': resolved_languages,
     }
 
+
 def inspect(args: argparse.Namespace, db: TinyDB) -> None:
-    meta = db.table('meta')
     console = Console()
-
-    if len(meta) > 0:
-        metadata = meta.all()[0]
-
-        created_on = metadata.get('created_on', None)
-        version = metadata.get('version', 'unknown')
-        commit = metadata.get('commit', 'unknown')
-
-        info = ['Database was created ']
-
-        if created_on:
-            info += [
-                'on ',
-                (format_datetime(datetime.datetime.fromisoformat(created_on)), 'blue'),
-            ]
-        info += [
-            ' using semgrep-search-db ',
-            (f'v{version}', 'green'),
-            ' (',
-            (commit, 'cyan'),
-            ')\n\n',
-        ]
-
-        console.print(Text.assemble(*info))
 
     stats = gather_stats(db, args)
 
-    origins = Table(title='Origin Overview', box=box.SIMPLE)
-    origins.add_column('Origin', style='blue', no_wrap=True)
-    origins.add_column('Number of rules', style='green', no_wrap=True)
+    console.print(Text.assemble(
+        'The database contains ',
+        (str(stats['count']), 'green'),
+        ' rules in total\n',
+    ))
 
-    for origin, num_rules in stats['origins'].items():
-        origins.add_row(origin, str(num_rules))
+    repos = db.table('repos')
+    if len(repos) > 0:
+        repo_table = Table(title='Repositories', box=box.SIMPLE, expand=True)
+
+        repo_table.add_column('ID', style='red')
+        repo_table.add_column('Name', style='blue')
+        repo_table.add_column('License')
+        repo_table.add_column('URL', no_wrap=True)
+        repo_table.add_column('Number of Rules', style='green')
+
+        for repo in repos:
+            url = repo.get('url', '')
+            if url:
+                url = f'[link={url}]{url}[/link]'
+            repo_table.add_row(
+                repo.get('id'),
+                repo.get('name'),
+                repo.get('license', ''),
+                url,
+                str(stats['origins'].get(repo['id'], 0)),
+            )
+
+        console.print(repo_table, no_wrap=False, soft_wrap=False)
+    else:
+        origins = Table(title='Origin Overview', box=box.SIMPLE)
+        origins.add_column('Origin', style='blue', no_wrap=True)
+        origins.add_column('Number of rules', style='green', no_wrap=True)
+
+        for origin, num_rules in stats['origins'].items():
+            origins.add_row(origin, str(num_rules))
+
+        console.print(origins)
 
     languages = Table(title='Language Overview', box=box.SIMPLE)
     languages.add_column('Language', style='blue', no_wrap=True)
-    languages.add_column('Number of rules', style='green', no_wrap=True)
+    languages.add_column('Number of Rules', style='green', no_wrap=True)
 
     for language, num_rules in sorted(stats['languages'].items(), key=lambda item: item[1], reverse=True):
         num_rules = str(num_rules) if num_rules > 0 else Text.assemble((str(num_rules), 'red'))
         languages.add_row(language, num_rules)
 
-    console.print(Columns([origins, languages], equal=False, expand=False))
+    console.print(languages)

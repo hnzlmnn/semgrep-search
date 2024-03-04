@@ -17,12 +17,14 @@
 import sys
 import argparse
 
+from rich.console import Console
+
 from sgs.const import DATA_DIR, CATEGORIES, SEVERITIES
 
 from sgs.database import get_database
 from sgs.inspection import inspect
 from sgs.search import search
-from sgs.utils import logger, build_logger
+from sgs.utils import logger, build_logger, get_metadata, print_verbose_info, get_version
 
 
 def parse_args() -> argparse.Namespace:
@@ -79,6 +81,21 @@ def main() -> int:
     if db is None:
         logger.error('Failed to load the database')
         return 1
+
+    meta = get_metadata(db)
+    if not meta:
+        logger.warning('Database did not contain valid metadata. This could mean that your database is very old. '
+                       'If errors occur, consider updating the database.')
+    else:
+        Console().print(print_verbose_info(meta))
+
+    if meta['min_version'] is None:
+        logger.warning('Database metadata does not specify a minimum semgrep-search version. '
+                       'Please consider updating the database.')
+    elif get_version() < meta['min_version']:
+        logger.warning('Database requires a newer version (%s) of semgrep-search than the installed one (%s). '
+                       'Please consider updating your semgrep-search installation.',
+                       str(meta['min_version']), str(get_version()))
 
     match args.command:
         case 'search':
