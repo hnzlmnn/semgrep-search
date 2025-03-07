@@ -12,6 +12,7 @@
           babel
           oras
           poetry-core
+          poetry-core
           pyyaml
           requests
           rich
@@ -24,26 +25,20 @@
       rec {
         # nix build
         packages.default = pkgs.python3Packages.buildPythonPackage {
+          dependencies = deps;
           pname = "semgrep-search";
-          propagatedBuildInputs = deps;
           pyproject = true;
           pythonRelaxDeps = true;
           src = ./.;
           version = "1.1.0";
-          nativeBuildInputs = with pkgs.python3Packages; [
-            poetry-core
-          ];
         };
 
-        # nix develop
+        # nix develop --command $SHELL
         devShells.default = pkgs.mkShell {
-          buildInputs = [
-            pkgs.python3
-            packages.default
-          ] ++ deps;
+          dependencies = [ packages.default ] ++ deps;
         };
 
-        # nix run
+        # nix run . -- search
         apps.default = {
           type = "app";
           program = "${packages.default}/bin/sgs";
