@@ -1,27 +1,29 @@
 [tool.poetry]
 name = "semgrep-search"
-version = "1.1.0"
+version = "1.1.1"
 description = "A tool to generate a custom Semgrep ruleset from multiple sources"
 authors = ["Malte Heinzelmann <malte@cybaer.ninja>"]
 readme = "README.md"
 license = "GPL-3.0-or-later"
 homepage = "https://github.com/hnzlmnn/semgrep-search"
-packages = [{include = "sgs"}]
+packages = [{include = "semgrep_search"}]
 
 [tool.poetry.scripts]
-sgs = "sgs.main:main"
+sgs = "semgrep_search:main"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-requests = "^2.31.0"
-PyYAML = "^6.0"
-oras = "^0.1.27"
-tinydb = "^4.8.0"
-ruamel-yaml = "^0.18.6"
-babel = "^2.14.0"
-rich = "^13.7.1"
-semver = "^3.0.2"
-tomli = "^2.0.1"
+requests = "^2.32.3"
+PyYAML = "^6.0.2"
+oras = "^0.2.25"
+tinydb = "^4.8.2"
+ruamel-yaml = "^0.18.10"
+babel = "^2.17.0"
+rich = "^13.9.4"
+semver = "^3.0.4"
+tomli = "^2.2.1"
+base58 = "^2.1.1"
+asyncio = "^3.4.3"
 
 [build-system]
 requires = ["poetry-core"]
@@ -29,7 +31,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
 
-include = ["**/*.py"]
+include = ["sgs/**/*.py"]
 target-version = "py38"
 
 # Allow lines to be as long as 120 characters.

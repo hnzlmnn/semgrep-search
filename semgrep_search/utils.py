@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import datetime
 import logging
+import os
 import sys
 from contextlib import contextmanager
 from importlib import metadata
@@ -31,7 +32,7 @@ from rich.text import Text
 from ruamel.yaml import YAML, CommentedSeq, CommentedMap
 from semver import Version
 
-from sgs.const import LANGUAGE_ALIASES
+from semgrep_search.const import LANGUAGE_ALIASES
 
 if TYPE_CHECKING:
     import argparse
@@ -93,13 +94,23 @@ def write_ruleset(rules: list[dict], stream: TextIO) -> None:
         rule_data: CommentedMap = yaml.load(rule['content'])
         rule_data.setdefault('metadata', CommentedMap())
 
+        # Add detailed information
+        rule_data['metadata'].setdefault('semgrep-search', CommentedMap())
+        # rule_data['metadata']['semgrep-search']['']
+
         # Add origin to metadata
         rule_data['metadata'].setdefault('semgrep.dev', CommentedMap())
         rule_data['metadata']['semgrep.dev'].setdefault('rule', CommentedMap())
         rule_data['metadata']['semgrep.dev']['rule']['origin'] = rule['source']
 
         data.append(rule_data)
-    yaml.dump({'rules': data}, stream)
+    output = CommentedMap({'rules': data})
+    output.yaml_set_comment_before_after_key(
+        'rules',
+        before=f'Generated on {format_datetime(datetime.datetime.now())} with semgrep-search '
+               f'(https://github.com/hnzlmnn/semgrep-search) v{str(get_version())}'
+    )
+    yaml.dump(output, stream)
 
 
 def get_metadata(db: TinyDB) -> Optional[dict]:
@@ -148,7 +159,7 @@ def print_verbose_info(meta: dict) -> Text:
 
 def get_version() -> Version:
     try:
-        version = metadata.version('semgrep-search-db')
+        version = metadata.version('semgrep-search')
     except PackageNotFoundError:
         try:
             with Path('pyproject.toml').open('rb') as fin:

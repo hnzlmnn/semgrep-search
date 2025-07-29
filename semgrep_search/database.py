@@ -24,8 +24,8 @@ from typing import Optional, TYPE_CHECKING
 from oras.provider import Registry
 from tinydb import TinyDB
 
-from sgs.const import DB_FILE, DB_FILENAME
-from sgs.utils import logger, measure_time
+from semgrep_search.const import DB_FILE, DB_FILENAME
+from semgrep_search.utils import logger, measure_time
 
 if TYPE_CHECKING:
     import argparse
@@ -33,20 +33,23 @@ if TYPE_CHECKING:
 
 class GhcrProvider(Registry):
     def __init__(self) -> None:
-        super().__init__('ghcr.io')
+        super().__init__('ghcr.io', tls_verify=False)
 
 
-def load_local() -> Optional[TinyDB]:
-    if not DB_FILE.exists():
+def load_local(args: argparse.Namespace) -> Optional[TinyDB]:
+    file = DB_FILE
+    if args.database:
+        file = Path(args.database).expanduser()
+    if not file.exists():
         return None
     try:
-        return TinyDB(DB_FILE)
+        return TinyDB(file)
     except Exception as e:
         logger.debug(str(e), exec_info=e)
         return None
 
 
-def update_db() -> Optional[TinyDB]:
+def update_db(args: argparse.Namespace) -> Optional[TinyDB]:
     files = GhcrProvider().pull(target='hnzlmnn/semgrep-search-db:latest')
     for file in files:
         path = Path(file)
@@ -60,16 +63,16 @@ def update_db() -> Optional[TinyDB]:
                 return None
             # Copy the database to the cache location
             shutil.copyfile(path, DB_FILE)
-            return load_local()
+            return load_local(args)
     logger.error('Could not find the database file in ')
     return None
 
 
 def get_database(args: argparse.Namespace) -> Optional[TinyDB]:
     # Try to load the local database first
-    db = load_local()
+    db = load_local(args)
 
-    if db is None or args.update:
+    if (db is None or args.update) and args.database is None:
         if db is not None:
             # Make sure we close the database before running update
             db.close()
@@ -78,7 +81,7 @@ def get_database(args: argparse.Namespace) -> Optional[TinyDB]:
 
         # Try to update
         with measure_time('Updated database in %s', logging.DEBUG):
-            return update_db()
+            return update_db(args)
 
     # No update should occur
     return db

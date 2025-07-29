@@ -23,8 +23,8 @@ from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 
-from sgs.const import LANGUAGES
-from sgs.utils import fix_languages
+from semgrep_search.const import LANGUAGES
+from semgrep_search.utils import fix_languages
 
 if TYPE_CHECKING:
     import argparse

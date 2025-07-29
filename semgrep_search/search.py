@@ -24,11 +24,12 @@ from typing import Optional, Callable, TYPE_CHECKING
 
 from tinydb import Query, TinyDB
 
-from sgs.utils import fix_languages, logger, write_ruleset
+from semgrep_search.utils import fix_languages, logger, write_ruleset
 
 if TYPE_CHECKING:
     import argparse
     from tinydb.table import Table
+    from semgrep_search.runconfig import RunConfig
 
 LOG = logging.getLogger(__name__)
 
@@ -72,6 +73,22 @@ class FilterConfig:
             origins=origins,
         )
 
+    @staticmethod
+    def from_config(config: 'RunConfig') -> 'FilterConfig':
+        languages = fix_languages(config.languages)
+        # TODO: This seems wrong, it should also affect severity I think
+        include_empty = 'null' in config.categories
+        categories = set(filter(lambda a: a != 'null', config.categories))
+        severities = set(config.severities)
+
+        return FilterConfig(
+            include_empty=include_empty,
+            languages=languages if len(languages) > 0 else None,
+            categories=categories if len(categories) > 0 else None,
+            severities=severities if len(severities) > 0 else None,
+            origins=None,
+        )
+
 
 def filter_rule_by_languages(config: FilterConfig) -> Callable[[list[str]], bool]:
     def filter_fn(langs: list[str]) -> bool:
@@ -86,6 +103,7 @@ def filter_rules(rules: Table, config: FilterConfig) -> list[dict]:
 
     q = Rule.id.exists()
 
+    # TODO: Should we add 'generic' rules by default?
     if config.languages is not None:
         q &= Rule.languages.test(filter_rule_by_languages(config))
 
