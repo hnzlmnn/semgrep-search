@@ -1,4 +1,4 @@
-FROM python:3.12-alpine
+FROM ghcr.io/astral-sh/uv:python3.12-alpine
 
 RUN apk update && apk add --no-cache \
     cargo \
@@ -7,20 +7,17 @@ RUN apk update && apk add --no-cache \
     musl-dev \
     rust
 
-ENV POETRY_HOME="/opt/poetry"
-ENV PATH="$POETRY_HOME/bin:$PATH"
-RUN curl -sSL https://install.python-poetry.org | python3 -
-
-WORKDIR /app
-COPY . .
-
-RUN poetry config virtualenvs.create false && \
-    poetry install --no-interaction --no-ansi
+# Place executables in the environment at the front of the path
+ENV PATH="/app/.venv/bin:$PATH"
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 
-RUN poetry config virtualenvs.create false
+WORKDIR /app
+COPY . .
 
-ENTRYPOINT ["poetry", "run", "sgs"]
+RUN uv sync --locked --no-dev
+RUN uv pip install -e .
+
+ENTRYPOINT ["sgs"]
 CMD ["--help"]
