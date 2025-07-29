@@ -1,19 +1,26 @@
-FROM python:alpine
+FROM python:3.12-alpine
 
-RUN apk add curl
+RUN apk update && apk add --no-cache \
+    cargo \
+    curl \
+    gcc \
+    musl-dev \
+    rust
 
+ENV POETRY_HOME="/opt/poetry"
+ENV PATH="$POETRY_HOME/bin:$PATH"
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
-WORKDIR /build
-
-COPY poetry.lock pyproject.toml ./
-
-RUN /root/.local/bin/poetry config virtualenvs.create false \
-  && /root/.local/bin/poetry install --no-interaction --no-ansi
-
-COPY . ./
-
 WORKDIR /app
+COPY . .
 
-ENTRYPOINT ["/root/.local/bin/poetry", "run", "sgs"]
+RUN poetry config virtualenvs.create false && \
+    poetry install --no-interaction --no-ansi
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+
+RUN poetry config virtualenvs.create false
+
+ENTRYPOINT ["poetry", "run", "sgs"]
 CMD ["--help"]
