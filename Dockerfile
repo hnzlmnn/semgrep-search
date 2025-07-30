@@ -1,11 +1,7 @@
 FROM ghcr.io/astral-sh/uv:python3.12-alpine
 
 RUN apk update && apk add --no-cache \
-    cargo \
-    curl \
-    gcc \
-    musl-dev \
-    rust
+    curl
 
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"

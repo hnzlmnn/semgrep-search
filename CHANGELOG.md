@@ -1,3 +1,7 @@
+# Version 1.1.4
+
+- Reduced docker container size
+
 # Version 1.1.3
 
 - Added `--disable-nosem` to run arguments
