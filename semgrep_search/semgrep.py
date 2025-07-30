@@ -45,11 +45,9 @@ async def run_semgrep(run: RunConfig):
     args = [
         # 'echo',
         run.binary,
-        '--disable-version-check', '--metrics=off',
+        '--disable-version-check', '--metrics=off', '--disable-nosem',
         '--config', str(run.rules_file.absolute()),
         *run.output_params(),
-        # str(run.target)
-        # 'python', '-c', 'import time; time.sleep(1); print("1"); time.sleep(1); print("2"); time.sleep(1); print("3"); time.sleep(1)'
     ]
 
     loop = asyncio.get_event_loop()

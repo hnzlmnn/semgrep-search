@@ -17,7 +17,6 @@ WORKDIR /app
 COPY . .
 
 RUN uv sync --locked --no-dev
-RUN uv pip install -e .
 
-ENTRYPOINT ["sgs"]
+ENTRYPOINT ["uv", "run", "semgrep-search"]
 CMD ["--help"]

@@ -1,6 +1,6 @@
 [project]
 name = "semgrep-search"
-version = "1.1.2"
+version = "1.1.3"
 description = "A tool to generate a custom Semgrep ruleset from multiple sources"
 authors = [{ name = "Malte Heinzelmann", email = "malte@cybaer.ninja" }]
 requires-python = ">=3.8"
@@ -26,6 +26,10 @@ Homepage = "https://github.com/hnzlmnn/semgrep-search"
 [project.scripts]
 sgs = "semgrep_search:main"
 semgrep-search = "semgrep_search:main"
+
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.sdist]
 include = ["semgrep_search"]
