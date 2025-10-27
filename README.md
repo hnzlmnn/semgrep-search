@@ -10,9 +10,13 @@ Since version v1.1.2 there is also a web ui to inspect rules, create custom coll
 
 ## Installation
 
-The easiest installation method is by using pip or pipx
+The easiest installation method is by using uv or uvx
 
-For example, using pip, `semgrep-search` can be installed by executing `pip install semgrep-search`
+For example, using pip, `semgrep-search` can be installed by executing `pip install semgrep-search`.
+
+By using `uvx`, `semgrep-search` can be run in a separate virtual env by running `uvx semgrep-search`.
+
+Additionally, a pre-built docker image is available at `ghcr.io/hnzlmnn/semgrep-search` that can be used directly, e.g. using `docker run --rm -v $path_to_scan:/path ghcr.io/hnzlmnn/semgrep-search:main run -C NF4RmWytw98 --output /path/semgrep /path`
 
 ## Usage
 
